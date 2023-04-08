@@ -1,3 +1,33 @@
+### NPM directories to be ignored
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+bookie-ui/node_modules
+bookie-ui/.pnp
+bookie-ui/.pnp.js
+
+# testing
+bookie-ui/coverage
+
+# production
+bookie-ui/build
+
+# misc
+bookie-ui/.DS_Store
+bookie-ui/.env.local
+bookie-ui/.env.development.local
+bookie-ui/.env.test.local
+bookie-ui/.env.production.local
+
+bookie-ui/npm-debug.log*
+bookie-ui/yarn-debug.log*
+bookie-ui/yarn-error.log*
+
+
+### Python directories to be ignored 
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
