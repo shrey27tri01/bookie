@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api.views import front
+from api.views import front, book, book_detail
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", front, name="front"),
+    path("api/book/", book, name="book"),
+    path("api/book/<int:pk>/", book_detail, name="detail")
 ]
