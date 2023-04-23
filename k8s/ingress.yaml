@@ -1,0 +1,21 @@
+# apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
+
+kind: Ingress
+
+metadata:
+  name: bookie-ingress
+spec:
+  rules:
+    - host: kubernetes.docker.internal
+      http:
+       paths:
+        - path: /
+          backend:
+            serviceName: ui-service
+            servicePort: 3000
+        
+        - path: /api
+          backend:
+            serviceName: bookie-service
+            servicePort: 8000

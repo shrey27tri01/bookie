@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Tripathi
+      MYSQL_DATABASE: bookie
+
+  bookie:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/bookie
+    depends_on:
+      - db
+
+  bookie_ui:
+    build: 
+      context: ./bookie_ui
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./bookie_ui:/bookie_ui
+    depends_on:
+      - bookie

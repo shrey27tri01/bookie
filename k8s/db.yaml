@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: db
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        resources: {}
+        ports:
+          - containerPort: 3306
+        volumeMounts:
+          - mountPath: /var/log/
+            name: db
+          - name: mysql-persistent-storage
+            mountPath: /var/lib/mysql
+        env:
+          - name: MYSQL_DATABASE
+            value: bookie
+          - name: MYSQL_ROOT_PASSWORD
+            value: Tripathi
+      volumes:
+        - name: db
+          hostPath:
+            path: /var/log/
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: db-pvc
+status: {}

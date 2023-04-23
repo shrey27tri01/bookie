@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-xwtt4c9_c=9pm7tj9+v(ksmdl=fc=a#^5z+cry(1sf1(p2p3lt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,10 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'rest_framework'
+    'rest_framework',
+    'corsheaders',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -57,7 +61,7 @@ ROOT_URLCONF = 'bookie.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'bookie-ui', 'build')],
+        'DIRS': [os.path.join(BASE_DIR, 'bookie_ui', 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,11 +83,16 @@ WSGI_APPLICATION = 'bookie.wsgi.application'
 DATABASES = {
      'default': {  
         'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'bookie',  
-        'USER': 'root',  
-        'PASSWORD': 'Tripathi',  
-        'HOST': '127.0.0.1',  
-        'PORT': '3306',  
+        # 'NAME': 'bookie',  
+        # 'USER': 'root',  
+        # 'PASSWORD': 'Tripathi',  
+        # 'HOST': '127.0.0.1',  
+        # 'PORT': '3306',
+        'NAME': os.environ.get('MYSQL_DATABASE', 'bookie'),
+        'USER': os.environ.get('MYSQL_USER', 'root'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'Tripathi'),
+        'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('MYSQL_PORT', '3306'),
         'OPTIONS': {  
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
         }  
@@ -96,10 +105,18 @@ DATABASES = {
 }
 
 REST_FRAMEWORK = {
+     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+     ),
      'DEFAULT_RENDERER_CLASSES': (
          'rest_framework.renderers.JSONRenderer',
+     ),
+     'DEFAULT_PERMISSION_CLASSES': (   
+          'rest_framework.permissions.AllowAny',
      )
- }
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -120,6 +137,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+SIMPLE_JWT = {
+     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+     'ROTATE_REFRESH_TOKENS': True,
+     'BLACKLIST_AFTER_ROTATION': True
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -137,7 +162,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bookie-ui', 'build', 'static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bookie_ui', 'build', 'static')]
 
 
 # Default primary key field type

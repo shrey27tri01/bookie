@@ -19,7 +19,7 @@ function Book() {
     function getBooks() {
       axios({
           method: "GET",
-          url:"/api/book/",
+          url:"http://localhost:8000/api/book/",
         }).then((response)=>{
           const data = response.data
           setNewBooks(data)
@@ -34,7 +34,7 @@ function Book() {
     function createBook(event) {
         axios({
           method: "POST",
-          url:"/api/book/",
+          url:"http://localhost:8000/api/book/",
           data:{
             isbn: formBook.isbn,
             title: formBook.title,
@@ -59,7 +59,7 @@ function Book() {
         console.log(id)
         axios({
           method: "DELETE",
-          url:`api/book/${id}/`,
+          url:`http://localhost:8000/api/book/${id}/`,
         })
         .then((response) => {
           getBooks()
