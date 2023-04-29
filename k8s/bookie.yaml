@@ -37,13 +37,16 @@ spec:
         volumeMounts:
           - mountPath: /var/log/
             name: bookie
-        command: ["/bin/sh", "-c", "echo \"127.0.0.1 db-service\" >> /etc/hosts && gunicorn bookie.wsgi --bind 0.0.0.0:8000"]
-        args:
-          - apt-get update;
-            apt-get -y install vim;
-            python manage.py makemigrations;
-            python manage.py migrate;
-            gunicorn --bind 0.0.0.0:8000 --workers 3 bookie.wsgi:application
+        # command: ["/bin/sh", "-c", "echo \"127.0.0.1 db-service\" >> /etc/hosts && gunicorn bookie.wsgi --bind 0.0.0.0:8000"]
+        # command: ["/bin/sh", "-c", "echo \"127.0.0.1 db-service\" >> /etc/hosts"]
+        # args:
+          # - apt-get update;
+          #   apt-get -y install vim;
+          #   echo $PATH;
+          #   pip freeze;
+          #   python manage.py makemigrations;
+          #   python manage.py migrate;
+          #   # gunicorn --bind 0.0.0.0:8000 --workers 3 bookie.wsgi:application
       volumes:
         - name: bookie
           hostPath:

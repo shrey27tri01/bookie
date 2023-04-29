@@ -1,3 +1,5 @@
+import React, { Component }  from 'react';
+
 function List(props){
     function handleClick(){
         props.deletion(props.id)

@@ -33,4 +33,4 @@ EXPOSE 8000
 # # Run the Django development server
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 # Start the Django server with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "bookie.wsgi:application"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "bookie.wsgi:application"]

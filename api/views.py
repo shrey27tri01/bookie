@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from api.models import Book
 # Create your views here.
 def front(request):
     context = { }
-    return render(request, "index.html", context)
+    return HttpResponse("return this string")
 
 @api_view(['GET', 'POST'])
 def book(request):
