@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useContext } from 'react';
 // import { UserContext } from '../AuthContext';
 // import { AuthContext } from '../AuthContext';
+import { useAuth } from '../Contexts/AuthContext';
+
 
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -12,6 +14,9 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 
 export default function Navbar() {
+
+  const {authUser, setAuthUser, isLoggedIn, setIsLoggedIn} = useAuth();
+
 
   // const { user } = useContext(UserContext);
   // console.log(user.user_id)
@@ -41,8 +46,22 @@ export default function Navbar() {
               Bookie
             </Typography>
             
-            {/* <p>Welcome, {userID}!</p> */}
-            <Button color="inherit" href="/logout">Logout</Button>          
+            {isLoggedIn? 
+              ( 
+                <>
+                  <span>Username: {authUser.Name}</span>
+                  <Button color="inherit" href="/logout">Logout</Button>
+                </>
+              ) 
+            : 
+              (
+                <>
+                  <Button color="inherit" href="/login">Login</Button>
+                  <Button color="inherit" href="/register">Register</Button>
+                </>  
+              )
+            }
+                      
           </Toolbar>
         </AppBar>
       </Box>

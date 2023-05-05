@@ -25,17 +25,17 @@ function App() {
   // console.log("user_id", user.user_id);
 
   return (
-    // <AuthProvider>
-    //   <div className='App'>
-    //     {/* <Book /> */}
-    //     <Layout>
-    //       <Urls/>
-    //     </Layout>
-    //   </div>
-    // </AuthProvider>
     <AuthProvider>
-      <Dashboard> </Dashboard> 
+      <div className='App'>
+        {/* <Book /> */}
+        <Layout>
+          <Urls/>
+        </Layout>
+      </div>
     </AuthProvider>
+    // <AuthProvider>
+    //   <Dashboard> </Dashboard> 
+    // </AuthProvider>
   );
 }
 

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 
 // import { AuthContext } from '../AuthContext';
 
+import { useAuth } from '../Contexts/AuthContext';
+
+
 //MaterialUI
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -45,6 +48,8 @@ export default function SignIn() {
 	// const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
 	// const { userID, setUserID } = useContext(AuthContext);
 
+	const {authUser, setAuthUser, isLoggedIn, setIsLoggedIn} = useAuth();
+
 	const navigate = useNavigate();
 	const initialFormData = Object.freeze({
 		email: '',
@@ -63,6 +68,11 @@ export default function SignIn() {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		// console.log(formData);
+
+		setIsLoggedIn(true);
+        setAuthUser({
+            Name: formData.user_name,
+        });
 
 		axiosInstance
 			.post(`token/`, {
