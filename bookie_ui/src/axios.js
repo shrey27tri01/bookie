@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { API_SERVER } from './settings';
 
-const baseURL = 'http://127.0.0.1:8000/api/';
+// const baseURL = 'http://127.0.0.1:8000/api/';
+const baseURL = API_SERVER + '/api/';
 
 const axiosInstance = axios.create({
 	baseURL: baseURL,
@@ -10,16 +12,19 @@ const axiosInstance = axios.create({
 			? 'JWT ' + localStorage.getItem('access_token')
 			: null,
 		'Content-Type': 'application/json',
+		'Access-Control-Allow-Origin': '*',
 		accept: 'application/json',
 	}, 
 });
 
 axiosInstance.interceptors.response.use(
 	(response) => {
+		console.log("response", response);
 		return response;
 	},
 	async function (error) {
 		const originalRequest = error.config;
+		console.log("error", error);
 
 		if (typeof error.response === 'undefined') {
 			alert(

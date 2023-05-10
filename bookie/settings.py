@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'django.db.backends.mysql',
 ]
 
 MIDDLEWARE = [
@@ -83,17 +84,12 @@ WSGI_APPLICATION = 'bookie.wsgi.application'
 
 DATABASES = {
      'default': {  
-        'ENGINE': 'django.db.backends.mysql',  
-        # 'NAME': 'bookie',  
-        # 'USER': 'root',  
-        # 'PASSWORD': 'Tripathi',  
-        # 'HOST': '127.0.0.1',  
-        # 'PORT': '3306',
-        'NAME': os.environ.get('MYSQL_DATABASE', 'bookie'),
-        'USER': os.environ.get('MYSQL_USER', 'root'),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'Tripathi'),
-        'HOST': os.environ.get('MYSQL_HOST', 'localhost'),
-        'PORT': os.environ.get('MYSQL_PORT', '3306'),
+        'ENGINE': os.environ.get('DB_ENGINE'),
+        'NAME': os.environ.get('DB_DATABASE'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
         'OPTIONS': {  
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
         }  
@@ -120,10 +116,19 @@ REST_FRAMEWORK = {
      ),
 }
 
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000',
-    'http://localhost:8000'
-)
+# CORS_ORIGIN_WHITELIST = (
+#     'http://localhost:3000',
+#     'http://localhost:8000',
+#     'http://kubernetes.docker.internal',
+# )
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1",
+    "http://localhost:3000",
+    "http://kubernetes.docker.internal",
+]
+
+CORS_ALLOW_CREDENTIALS = False
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -203,12 +208,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bookie_ui', 'build', 'static')]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# #########################################
+#     ##  IMPORT LOCAL SETTINGS ##
+# #########################################
+
+# try:
+#     from .local_settings import * 
+# except ImportError: 
+#     pass 

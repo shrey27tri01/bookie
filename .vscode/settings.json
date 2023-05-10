@@ -1,3 +1,9 @@
 {
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "vs-kubernetes": {
+        "disable-linters": ["resource-limits"],
+    },
+    "yaml.schemas": {
+        "https://json.schemastore.org/kustomization.json": "file:///Users/tripathi/bookie/k8s/mysql.yaml"
+    },
 }

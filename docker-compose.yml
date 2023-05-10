@@ -1,31 +1,53 @@
-version: '3'
+version: "3.7"
 
 services:
-  db:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: Tripathi
-      MYSQL_DATABASE: bookie
-
-  bookie:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    ports:
-      - "8000:8000"
+  django:
+    build:
+      context: ./
+      dockerfile: Dockerfile
     volumes:
-      - .:/bookie
+      - django_static_volume:/usr/src/app/static
+    expose:
+      - 8000
+    env_file:
+      - ./.env
+    command: gunicorn bookie.wsgi:application --bind 0.0.0.0:8000
     depends_on:
       - db
-
-  bookie_ui:
-    build: 
+  db:
+    image: mysql:8.0.33
+    volumes:
+      - mysql_data:/var/lib/mysql/data/
+    env_file:
+      - ./mysql/.env
+  react:
+    build:
       context: ./bookie_ui
       dockerfile: Dockerfile
-    command: npm start
-    ports:
-      - "3000:3000"
+      args:
+        - API_SERVER=${ENV_API_SERVER}
     volumes:
-      - ./bookie_ui:/bookie_ui
+      - react_static_volume:/usr/src/app/ui/build/static
+    expose:
+      - 3000
+    env_file:
+      - .env
+    command: serve -s build -l 3000
     depends_on:
-      - bookie
+      - django
+
+  nginx:
+    restart: always
+    build: ./nginx
+    volumes:
+      - django_static_volume:/usr/src/app/django_files/static
+      - react_static_volume:/usr/src/app/ui/react_files/static
+    ports:
+      - 80:80
+    depends_on:
+      - react
+
+volumes:
+  mysql_data:
+  django_static_volume:
+  react_static_volume:
