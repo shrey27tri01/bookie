@@ -40,4 +40,4 @@ jobs:
 
       - name: SSH into VM and reload pods through ansible playbook
         shell: bash
-        run: ansible-playbook -i inventory playbook.yml 
+        run: ansible-playbook -i inventory playbook.yaml 
