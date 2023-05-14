@@ -38,14 +38,6 @@ jobs:
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/bookie_ui:latest
 
-      - name: SSH into Azure VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.VM_IP_ADDRESS }}
-          username: azureuser
-          key: ${{ env.SSH_PRIVATE_KEY }}
-
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f ./kubernetes/backend.yaml
-          kubectl apply -f ./kubernetes/frontend.yaml
+      - name: SSH into VM and reload pods through ansible playbook
+        shell: bash
+        run: ansible-playbook -i inventory playbook.yml 

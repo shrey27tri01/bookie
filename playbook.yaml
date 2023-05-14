@@ -1,0 +1,15 @@
+# SSH into the machine and run kubectl apply -f django and react yaml files
+
+- name: Perform SSH steps on Azure VM
+  hosts: azure_vm
+  gather_facts: true
+
+  tasks:
+  # - name: Change directory to Kubernetes folder
+  #   shell: cd 
+
+  - name: Reload backend pod
+    shell: chdir=bookie/k8s kubectl apply -f django.yaml
+
+  - name: Reload frontend pod
+    shell: chdir=bookie/k8s kubectl apply -f react.yaml
