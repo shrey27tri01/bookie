@@ -36,6 +36,9 @@ jobs:
           context: ./bookie_ui
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/bookie_ui:latest
+      
+      - name: Change permission for private key
+        run: chmod 400 bookie.cer
 
       - name: SSH into VM and reload pods through ansible playbook
         shell: bash
