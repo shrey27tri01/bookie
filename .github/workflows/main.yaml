@@ -1,0 +1,82 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_DB: ${{ secrets.MYSQL_DB }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY }}/backend:latest
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY }}/frontend:latest
+
+      - name: Configure kubectl
+        uses: steebchen/kubectl@v1
+        with:
+          version: 'latest'
+          update: true
+          kubeconfig-data: ${{ secrets.KUBE_CONFIG_DATA }}
+
+      - name: Apply Kubernetes manifests
+        uses: appleboy/kubectl-action@master
+        with:
+          args: apply -f k8s/
+
+      - name: Wait for MySQL to start
+        run: |
+          kubectl wait --for=condition=Ready pod -l component=mysql
+
+      - name: Run Django migrations
+        run: |
+          kubectl exec -it $(kubectl get pods -l component=django -o name) -- python manage.py migrate
+
+      - name: Run Django tests
+        run: |
+          kubectl exec -it $(kubectl get pods -l component=django -o name) -- python manage.py test
+
+      - name: Run React tests
+        run: |
+          kubectl exec -it $(kubectl get pods -l component=react -o name) -- npm test
+
+secrets:
+  DOCKER_REGISTRY:
+    value: <your docker registry>
+  DOCKER_USERNAME:
+    value: <your docker username>
+  DOCKER_PASSWORD:
+    value: <your docker password>
+  KUBE_CONFIG_DATA:
+    value: ${{ secrets.KUBE_CONFIG_DATA }}
+  MYSQL_ROOT_PASSWORD:
+    value: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  MYSQL_DB:
+    value: ${{ secrets.MYSQL_DB }}

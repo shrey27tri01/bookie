@@ -1,0 +1,96 @@
+###########################
+# Persistent Volume
+###########################
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/var/lib/data/mysql_data"
+  persistentVolumeReclaimPolicy: Retain
+---
+###########################
+# Persistent Volume Claim
+###########################
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+---
+###########################
+# Deployment
+###########################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: mysql
+  template:
+    metadata:
+      labels:
+        component: mysql
+    spec:
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-persistent-volume-claim
+      containers:
+        - name: mysql-container
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql-data
+              subPath: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MYSQL_DB
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+---
+###########################
+# Cluster IP Service
+###########################
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306

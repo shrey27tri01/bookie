@@ -1,0 +1,87 @@
+###########################
+# Persistent Volume Claim
+###########################
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-mysql-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+---
+###########################
+# Deployment
+###########################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: test-mysql
+  template:
+    metadata:
+      labels:
+        component: test-mysql
+    spec:
+      initContainers:
+      - name: test-init-mysql
+        image: mysql:8.0
+        command: ['sh', '-c', 'echo "CREATE DATABASE bookie;" | mysql -h localhost -u root -p${MYSQL_ROOT_PASSWORD}']
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_ROOT_PASSWORD
+      volumes:
+        - name: test-mysql-data
+          persistentVolumeClaim:
+            claimName: test-mysql-persistent-volume-claim
+      containers:
+        - name: test-mysql-container
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: test-mysql-data
+              mountPath: /var/lib/mysql-data
+              subPath: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MYSQL_DB
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+---
+###########################
+# Cluster IP Service
+###########################
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-mysql-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
