@@ -1,82 +1,51 @@
-name: CI/CD Pipeline
+name: Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_HUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  VM_IP_ADDRESS: "40.76.242.180"
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      MYSQL_DB: ${{ secrets.MYSQL_DB }}
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Login to Docker registry
+      - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          registry: ${{ env.DOCKER_REGISTRY }}
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push backend Docker image
+      - name: Build and push backend image
         uses: docker/build-push-action@v2
         with:
-          context: ./backend
+          context: ./
           push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/backend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/bookie:latest
 
-      - name: Build and push frontend Docker image
+      - name: Build and push frontend image
         uses: docker/build-push-action@v2
         with:
-          context: ./frontend
+          context: ./bookie_ui
           push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/frontend:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/bookie_ui:latest
 
-      - name: Configure kubectl
-        uses: steebchen/kubectl@v1
+      - name: SSH into Azure VM
+        uses: appleboy/ssh-action@master
         with:
-          version: 'latest'
-          update: true
-          kubeconfig-data: ${{ secrets.KUBE_CONFIG_DATA }}
+          host: ${{ env.VM_IP_ADDRESS }}
+          username: azureuser
+          key: ${{ env.SSH_PRIVATE_KEY }}
 
-      - name: Apply Kubernetes manifests
-        uses: appleboy/kubectl-action@master
-        with:
-          args: apply -f k8s/
-
-      - name: Wait for MySQL to start
+      - name: Deploy to Kubernetes
         run: |
-          kubectl wait --for=condition=Ready pod -l component=mysql
-
-      - name: Run Django migrations
-        run: |
-          kubectl exec -it $(kubectl get pods -l component=django -o name) -- python manage.py migrate
-
-      - name: Run Django tests
-        run: |
-          kubectl exec -it $(kubectl get pods -l component=django -o name) -- python manage.py test
-
-      - name: Run React tests
-        run: |
-          kubectl exec -it $(kubectl get pods -l component=react -o name) -- npm test
-
-secrets:
-  DOCKER_REGISTRY:
-    value: <your docker registry>
-  DOCKER_USERNAME:
-    value: <your docker username>
-  DOCKER_PASSWORD:
-    value: <your docker password>
-  KUBE_CONFIG_DATA:
-    value: ${{ secrets.KUBE_CONFIG_DATA }}
-  MYSQL_ROOT_PASSWORD:
-    value: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-  MYSQL_DB:
-    value: ${{ secrets.MYSQL_DB }}
+          kubectl apply -f ./kubernetes/backend.yaml
+          kubectl apply -f ./kubernetes/frontend.yaml
