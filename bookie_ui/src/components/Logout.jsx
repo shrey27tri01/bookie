@@ -24,6 +24,7 @@ export default function Logout() {
         setAuthUser(null);
 
 		navigate('/login');
+		window.location.reload();
 	});
 	return <div>Logout</div>;
 }

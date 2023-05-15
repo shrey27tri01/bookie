@@ -84,6 +84,7 @@ export default function SignIn() {
 				});
 
 				navigate('/');
+				window.location.reload();
 			});
 			
 

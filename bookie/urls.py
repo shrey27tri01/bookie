@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api.views import front, book, book_detail
+from api.views import front, BookView, BookDeleteView
 # from api.views import front
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -41,9 +41,9 @@ urlpatterns = [
     path("api/user/",
           include('users.urls', namespace='users')),
     path("api/book/", 
-          book, 
+          BookView.as_view(),
           name="book"),
     path("api/book/<int:pk>/", 
-          book_detail, 
+          BookDeleteView.as_view(), 
           name="detail")
 ]
