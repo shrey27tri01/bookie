@@ -6,7 +6,10 @@ from rest_framework.views import APIView
 from .serializers import CustomUserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
+import logging
 
+logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 # Create your views here.
 
@@ -14,7 +17,8 @@ class CustomUserCreate(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, format='json'):
-        print(request.data)
+        logger.info('Creating new user %s', request.data['user_name'])
+        print(request.data['user_name'])
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -26,7 +30,7 @@ class CustomUserCreate(APIView):
 class BlacklistTokenUpdateView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = ()
-
+    logger.info('BlackListToken created')
     def post(self, request):
         try:
             refresh_token = request.data["refresh_token"]
@@ -40,6 +44,7 @@ class GetUserInfo(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, format='json'):
+        logger.info('Getting user info for %s', request.user)
         print(request.user)
         try:
             user = request.user

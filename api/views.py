@@ -8,6 +8,10 @@ from api.models import Book
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.views import APIView
+import logging
+
+logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 # Create your views here.
 def front(request):
@@ -33,6 +37,7 @@ def front(request):
 class BookView(APIView):
     permission_classes = [AllowAny]
     def get(self, request, format='json'):
+        logger.info('Get book review for user %s', request.user)
         print(request.user)
         try:
             note = Book.objects.all()
@@ -42,6 +47,7 @@ class BookView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request, format='json'):
+        logger.info('Create book review for user')
         serializer = BookSerializer(data=request.data)
         print(request.data)
         if serializer.is_valid():
@@ -53,6 +59,7 @@ class BookView(APIView):
 class BookDeleteView(APIView):
     permission_classes = [AllowAny]
     def delete(self, request, pk, format='json'):   
+        logger.info('Delete book review')
         try:
             book = Book.objects.get(pk=pk)
         except Book.DoesNotExist:
