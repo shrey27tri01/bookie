@@ -5,8 +5,8 @@
   gather_facts: true
 
   tasks:
-  # - name: Change directory to Kubernetes folder
-  #   shell: cd 
+  - name: Start the Minikube cluster
+    shell: minikube start
 
   - name: Reload backend pod
     shell: chdir=bookie/k8s kubectl apply -f django.yaml
