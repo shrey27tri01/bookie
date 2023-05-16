@@ -6,7 +6,7 @@
 
   tasks:
   - name: Start the Minikube cluster
-    shell: minikube start
+    shell: minikube start --driver=docker
 
   - name: Reload backend pod
     shell: chdir=bookie/k8s kubectl apply -f django.yaml
